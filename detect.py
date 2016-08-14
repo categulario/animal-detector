@@ -22,6 +22,6 @@ while True:
     send_notification(
         title = 'New video recorded',
         message = 'Your raspberry has recorded a new video',
-        url = 'http://192.168.1.72/',
+        url = 'http://192.168.1.72/animal-detector/{}'.format(filename),
         url_title = 'Go to the video',
     )
