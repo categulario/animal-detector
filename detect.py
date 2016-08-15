@@ -13,12 +13,14 @@ while True:
     pir.wait_for_motion()
     filename = datetime.now().strftime('%Y-%m-%d_%H.%M.%S.h264')
     print(filename, end='\r', flush=True)
+
     led.on()
-    camera.start_recording(filename)
+    camera.start_recording('videos/'+filename)
     sleep(30) # Record for 30 secs
     camera.stop_recording()
     led.off()
     print(' '*len(filename), end='\r', flush=True)
+
     send_notification(
         title = 'New video recorded',
         message = 'Your raspberry has recorded a new video',
