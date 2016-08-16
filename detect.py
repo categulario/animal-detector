@@ -6,6 +6,7 @@ from time import sleep, time
 from pushover import send_notification
 import subprocess
 import signal
+import os
 
 # Setup some io
 pir    = MotionSensor(4)
@@ -49,10 +50,13 @@ def main(killer):
             url = 'http://192.168.1.72/animal-detector/{}.mp4'.format(filename),
             url_title = 'Go to the video',
         )
+    os.remove('detect.pid')
     print("Babay!")
 
 if __name__ == '__main__':
     print('Waiting for some aminal...', flush=True)
+    with open('detect.pid', 'w') as pidfile:
+        pidfile.write(str(os.getpid()))
 
     killer = GracefulKiller()
     main(killer)
