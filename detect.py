@@ -5,6 +5,7 @@ from datetime import datetime
 from time import sleep, time
 from pushover import send_notification
 import subprocess
+import settings
 import signal
 import os
 
@@ -44,12 +45,14 @@ def main(killer):
         subprocess.check_call(['MP4Box', '-add', 'videos/{}.h264'.format(filename), 'videos/{}.mp4'.format(filename)])
 
         print('Notify about {}'.format(filename), flush=True)
-        send_notification(
-            title = 'New video recorded',
-            message = 'Your raspberry has recorded a new video',
-            url = 'http://192.168.1.72/animal-detector/{}.mp4'.format(filename),
-            url_title = 'Go to the video',
-        )
+        if settings.PUSHOVER_ENABLE:
+            send_notification(
+                title = 'New video recorded',
+                message = 'Your raspberry has recorded a new video',
+                url = 'http://192.168.1.72/animal-detector/{}.mp4'.format(filename),
+                url_title = 'Go to the video',
+            )
+
     os.remove('detect.pid')
     print("Babay!")
 
