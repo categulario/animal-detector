@@ -23,6 +23,9 @@ class GracefulKiller:
   def exit_gracefully(self,signum, frame):
     self.kill_now = True
 
+def call(command):
+    return subprocess.check_call(command.split(' '))
+
 def main(killer):
     while True:
         if killer.kill_now:
@@ -42,7 +45,12 @@ def main(killer):
 
         print('Encoding {}'.format(filename), flush=True)
         # Wrap the file into mp4 so i can view it
-        subprocess.check_call(['MP4Box', '-add', 'videos/{}.h264'.format(filename), 'videos/{}.mp4'.format(filename)])
+        call('MP4Box -add videos/{0}.h264 videos/{0}.mp4'.format(filename))
+
+        print('Uploading video to dropbox', flush=True)
+        # Upload the video to dropbox
+        call('dropbox_uploader.sh upload videos/{0}.mp4 records/{0}.mp4'.format(filename))
+        call('dropbox_uploader.sh share records/{0}.mp4'.format(filename))
 
         print('Notify about {}'.format(filename), flush=True)
         if settings.PUSHOVER_ENABLE:

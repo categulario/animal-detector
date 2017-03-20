@@ -4,8 +4,8 @@ import settings
 
 def send_notification(title='Title', message='message', url=None, url_title=None):
     r = requests.post('https://api.pushover.net/1/messages.json', data={
-        'token'     : settings.TOKEN,
-        'user'      : settings.USER_KEY,
+        'token'     : settings.PUSHOVER_TOKEN,
+        'user'      : settings.PUSHOVER_USER_KEY,
         'title'     : title,
         'message'   : message,
         'url'       : url,
