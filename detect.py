@@ -12,7 +12,7 @@ import os
 # Setup some io
 pir    = MotionSensor(4)
 camera = PiCamera()
-led    = LED(17)
+led    = LED(23)
 
 class GracefulKiller:
   kill_now = False
