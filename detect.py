@@ -48,7 +48,7 @@ def main(killer):
             call('dropbox_uploader.sh upload videos/{0}.mp4 records/{0}.mp4'.format(filename))
 
             output = call('dropbox_uploader.sh share records/{0}.mp4'.format(filename))
-            link = output.split(' ')[3]
+            link = output.split(' ')[3] if output else None
         else:
             link = None
 

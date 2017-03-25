@@ -18,7 +18,12 @@ def connection_available(host="8.8.8.8", port=80, timeout=3):
         return False
 
 def call(command):
-    output = subprocess.check_output(command.split(' '))
+    try:
+        output = subprocess.check_output(command.split(' '))
+    except subprocess.CalledProcessError as e:
+        logging.warning(e)
+        return None
+
     encoded = output.decode('utf8').strip()
 
     return encoded
