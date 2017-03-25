@@ -4,6 +4,7 @@ from picamera import PiCamera
 from datetime import datetime
 from time import sleep, time
 from pushover import send_notification
+from utils import connection_available
 import subprocess
 import settings
 import signal
@@ -47,13 +48,14 @@ def main(killer):
         # Wrap the file into mp4 so i can view it
         call('MP4Box -add videos/{0}.h264 videos/{0}.mp4'.format(filename))
 
-        print('Uploading video to dropbox', flush=True)
-        # Upload the video to dropbox
-        call('dropbox_uploader.sh upload videos/{0}.mp4 records/{0}.mp4'.format(filename))
-        call('dropbox_uploader.sh share records/{0}.mp4'.format(filename))
+        if settings.DROPBOX_ENABLE and connection_available():
+            print('Uploading video to dropbox', flush=True)
+            # Upload the video to dropbox
+            call('dropbox_uploader.sh upload videos/{0}.mp4 records/{0}.mp4'.format(filename))
+            call('dropbox_uploader.sh share records/{0}.mp4'.format(filename))
 
-        print('Notify about {}'.format(filename), flush=True)
-        if settings.PUSHOVER_ENABLE:
+        if settings.PUSHOVER_ENABLE and connection_available():
+            print('Notify about {}'.format(filename), flush=True)
             send_notification(
                 title = 'New video recorded',
                 message = 'Your raspberry has recorded a new video',
