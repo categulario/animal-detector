@@ -5,14 +5,12 @@ from datetime import datetime
 from time import sleep, time
 from pushover import send_notification
 from utils import connection_available, call
+import argparse
 import settings
+import logging
 import signal
+import sys
 import os
-
-# Setup some io
-pir    = MotionSensor(4)
-camera = PiCamera()
-led    = LED(23)
 
 class GracefulKiller:
   kill_now = False
@@ -32,7 +30,7 @@ def main(killer):
             # no motion, the wait process stopped by timeout
             continue
         filename = datetime.now().strftime('%Y-%m-%d_%H.%M.%S')
-        print('Recording {}'.format(filename), flush=True)
+        logging.info('Recording {}'.format(filename))
 
         led.on()
         camera.start_recording('videos/{}.h264'.format(filename))
@@ -40,12 +38,12 @@ def main(killer):
         camera.stop_recording()
         led.off()
 
-        print('Encoding {}'.format(filename), flush=True)
+        logging.info('Encoding {}'.format(filename))
         # Wrap the file into mp4 so i can view it
         call('MP4Box -add videos/{0}.h264 videos/{0}.mp4'.format(filename))
 
         if settings.DROPBOX_ENABLE and connection_available():
-            print('Uploading video to dropbox', flush=True)
+            logging.info('Uploading video to dropbox')
             # Upload the video to dropbox
             call('dropbox_uploader.sh upload videos/{0}.mp4 records/{0}.mp4'.format(filename))
 
@@ -55,7 +53,7 @@ def main(killer):
             link = None
 
         if settings.PUSHOVER_ENABLE and connection_available():
-            print('Notify about {}'.format(filename), flush=True)
+            logging.info('Notify about {}'.format(filename))
             send_notification(
                 title = 'New video recorded',
                 message = 'Your raspberry has recorded a new video',
@@ -64,12 +62,31 @@ def main(killer):
             )
 
     os.remove('detect.pid')
-    print("Babay!")
+    logging.info("Babay!")
 
 if __name__ == '__main__':
-    print('Waiting for some aminal...', flush=True)
-    with open('detect.pid', 'w') as pidfile:
-        pidfile.write(str(os.getpid()))
+    parser = argparse.ArgumentParser(description='runs the detector process')
+
+    parser.add_argument('--pid', type=argparse.FileType('w'), help='the file to write the pidfile', default='detect.pid')
+    parser.add_argument('--logfile', type=argparse.FileType('a'), help='where to log', default=sys.stdout)
+    parser.add_argument('--log', help="log level", default=logging.INFO)
+
+    args = parser.parse_args()
+
+    logging.basicConfig(
+        stream=args.logfile,
+        level=args.log,
+        format='%(asctime)s:%(name)s:%(levelname)s %(message)s',
+    )
+
+    logging.info('Waiting for some aminal...')
+
+    args.pid.write(str(os.getpid()))
+
+    # Setup some io
+    pir    = MotionSensor(4)
+    camera = PiCamera()
+    led    = LED(23)
 
     killer = GracefulKiller()
     main(killer)

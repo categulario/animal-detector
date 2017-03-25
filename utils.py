@@ -1,5 +1,6 @@
 import socket
 import subprocess
+import logging
 
 # from http://stackoverflow.com/questions/3764291/checking-network-connection#3764660
 def connection_available(host="8.8.8.8", port=80, timeout=3):
@@ -13,7 +14,7 @@ def connection_available(host="8.8.8.8", port=80, timeout=3):
         socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
         return True
     except Exception as ex:
-        print(ex.message)
+        logging.warning(ex.message)
         return False
 
 def call(command):
