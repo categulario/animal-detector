@@ -4,8 +4,7 @@ from picamera import PiCamera
 from datetime import datetime
 from time import sleep, time
 from pushover import send_notification
-from utils import connection_available
-import subprocess
+from utils import connection_available, call
 import settings
 import signal
 import os
@@ -23,9 +22,6 @@ class GracefulKiller:
 
   def exit_gracefully(self,signum, frame):
     self.kill_now = True
-
-def call(command):
-    return subprocess.check_call(command.split(' '))
 
 def main(killer):
     while True:
@@ -52,14 +48,18 @@ def main(killer):
             print('Uploading video to dropbox', flush=True)
             # Upload the video to dropbox
             call('dropbox_uploader.sh upload videos/{0}.mp4 records/{0}.mp4'.format(filename))
-            call('dropbox_uploader.sh share records/{0}.mp4'.format(filename))
+
+            output = call('dropbox_uploader.sh share records/{0}.mp4'.format(filename))
+            link = output.split(' ')[3]
+        else:
+            link = None
 
         if settings.PUSHOVER_ENABLE and connection_available():
             print('Notify about {}'.format(filename), flush=True)
             send_notification(
                 title = 'New video recorded',
                 message = 'Your raspberry has recorded a new video',
-                url = 'http://192.168.1.72/animal-detector/{}.mp4'.format(filename),
+                url = link if link else 'http://categulario.tk/estepicursor.gif',
                 url_title = 'Go to the video',
             )
 
